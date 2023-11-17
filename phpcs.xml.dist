@@ -13,7 +13,7 @@
 	<arg name="parallel" value="20"/>
 
 	<!-- Includes -->
-	<file>./on-demand-revalidation.php</file>
+	<file>./wp-graphql-cloudflare-cache.php</file>
     <file>./uninstall.php</file>
 	<file>./src</file>
 

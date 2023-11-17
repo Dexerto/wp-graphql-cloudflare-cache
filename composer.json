@@ -1,16 +1,16 @@
 {
-    "name": "gdidentity/on-demand-revalidation",
+    "name": "dexerto/wp-graphql-cloudflare-cache",
     "type": "wordpress-plugin",
     "license": "GPL-3.0-or-later",
     "autoload": {
         "psr-4": {
-            "OnDemandRevalidation\\": "src/"
+            "WpGraphQLCloudflareCache\\": "src/"
         }
     },
     "authors": [
         {
-            "name": "GD IDENTITY",
-            "email": "jakub.bebjak@gdidentity.sk"
+            "name": "DEXERTO",
+            "email": "rob.humar@dexerto.com"
         }
     ],
     "config": {
@@ -19,9 +19,9 @@
         }
     },
     "require-dev": {
-        "automattic/vipwpcs": "^2.3",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.7",
-        "phpcompatibility/phpcompatibility-wp": "*"
+        "automattic/vipwpcs": "^3.0",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "phpcompatibility/phpcompatibility-wp": "^2.1"
     },
     "scripts": {
         "phpcs": [
