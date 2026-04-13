@@ -34,7 +34,7 @@ class Purge {
 				'Content-Type' => 'application/json',
 				'Authorization' => 'Bearer ' . $auth_key,
 			],
-			'body' => json_encode([
+			'body' => wp_json_encode([
 				'tags' => $purge_keys
 			])
 		]);
