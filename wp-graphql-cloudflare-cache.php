@@ -215,7 +215,8 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 
 			// Setup Settings link.
 			add_filter('plugin_action_links_' . plugin_basename( __FILE__ ), function ( $links ) {
-				$links[] = '<a href="/wp-admin/admin.php?page=wp-graphql-cloudflare-cache">Settings</a>';
+				$url     = esc_url( admin_url( 'admin.php?page=wp-graphql-cloudflare-cache' ) );
+				$links[] = '<a href="' . $url . '">Settings</a>';
 
 				return $links;
 			});
