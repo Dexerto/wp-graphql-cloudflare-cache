@@ -64,11 +64,14 @@ jobs:
 
           while IFS= read -r msg; do
             [ -z "$msg" ] && continue
+            # Strip conventional commit prefix (e.g. "feat: ", "fix(scope): ")
+            body="${msg#*: }"
             case "$msg" in
-              feat:*|feat\(*) FEATURES="${FEATURES}\n- ${msg#feat: }" ;;
-              fix:*|fix\(*)   FIXES="${FIXES}\n- ${msg#fix: }" ;;
-              docs:*|chore:*|ci:*|style:*|refactor:*|test:*) ;; # skip noise
-              *)              OTHER="${OTHER}\n- ${msg}" ;;
+              feat:*|feat\(*)                                     FEATURES="${FEATURES}\n- ${body}" ;;
+              fix:*|fix\(*)                                       FIXES="${FIXES}\n- ${body}" ;;
+              perf:*|perf\(*)                                     FEATURES="${FEATURES}\n- ${body}" ;;
+              docs:*|chore:*|ci:*|style:*|refactor:*|test:*|build:*) ;; # skip noise
+              *)                                                  OTHER="${OTHER}\n- ${msg}" ;;
             esac
           done <<< "$COMMITS"
 
@@ -94,7 +97,7 @@ jobs:
           # Also set as output for this workflow
           {
             echo "body<<CHANGELOG_EOF"
-            printf "%b" "$BODY"
+            printf "%b\n" "$BODY"
             echo "CHANGELOG_EOF"
           } >> "$GITHUB_OUTPUT"
 
