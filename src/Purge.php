@@ -4,9 +4,11 @@ namespace WpGraphQLCloudflareCache;
 
 class Purge {
     const CLOUDFLARE_API_URL = 'https://api.cloudflare.com/client/v4/zones/';
+    const ERROR_TRANSIENT    = 'wpgraphql_cf_purge_error';
 
 	public static function init() {
 		add_action( 'graphql_purge', [ self::class, 'purge_tags' ], 10, 1 );
+		add_action( 'admin_notices', [ self::class, 'show_purge_error_notice' ] );
 	}
 
 	public static function purge_tags( $purge_keys, $event = '', $hostname = '' ) {
@@ -40,7 +42,7 @@ class Purge {
 		]);
 
         if ( is_wp_error( $response ) ) {
-			error_log( 'Cloudflare Cache Purge Error: ' . $response->get_error_message() );
+			self::set_error( $response->get_error_message() );
 			return false;
         }
 
@@ -49,10 +51,41 @@ class Purge {
 
         if ( $status_code < 200 || $status_code >= 300 || empty( $body['success'] ) ) {
 			$errors = isset( $body['errors'] ) ? wp_json_encode( $body['errors'] ) : "HTTP $status_code";
-			error_log( 'Cloudflare Cache Purge Failed: ' . $errors );
+			self::set_error( $errors );
 			return false;
         }
 
         return $body;
+	}
+
+	private static function set_error( $message ) {
+		error_log( 'Cloudflare Cache Purge Error: ' . $message );
+		set_transient( self::ERROR_TRANSIENT, $message, HOUR_IN_SECONDS );
+	}
+
+	public static function show_purge_error_notice() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$error = get_transient( self::ERROR_TRANSIENT );
+		if ( ! $error ) {
+			return;
+		}
+
+		delete_transient( self::ERROR_TRANSIENT );
+		?>
+		<div class="notice notice-error">
+			<p>
+				<?php
+				printf(
+					/* translators: %s: error message from Cloudflare API */
+					esc_html__( 'Cloudflare cache purge failed: %s', 'wp-graphql-cloudflare-cache' ),
+					esc_html( $error )
+				);
+				?>
+			</p>
+		</div>
+		<?php
 	}
 }
