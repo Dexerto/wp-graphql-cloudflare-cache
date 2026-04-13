@@ -256,7 +256,7 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 	function show_wpgraphql_dependency_notice() {
 		?>
 		<div class="error">
-			<p><?php echo esc_html( 'Error: Plugin "WP GraphQL Cloudflare Cache" requires "WPGraphQL" to be activated.', 'wp-graphql-cloudflare-cache' ); ?></p>
+			<p><?php esc_html_e( 'Error: Plugin "WP GraphQL Cloudflare Cache" requires "WPGraphQL" to be activated.', 'wp-graphql-cloudflare-cache' ); ?></p>
 		</div>
 		<?php
 	}
@@ -264,7 +264,7 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 	function show_wpgraphql_version_notice() {
 		?>
 		<div class="error">
-			<p><?php echo esc_html( 'Error: Plugin "WP GraphQL Cloudflare Cache" requires "WPGraphQL" version 1.16.0 or higher.', 'wp-graphql-cloudflare-cache' ); ?></p>
+			<p><?php esc_html_e( 'Error: Plugin "WP GraphQL Cloudflare Cache" requires "WPGraphQL" version 1.16.0 or higher.', 'wp-graphql-cloudflare-cache' ); ?></p>
 		</div>
 		<?php
 	}
