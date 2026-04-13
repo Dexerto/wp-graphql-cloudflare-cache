@@ -2,18 +2,20 @@ name: Deploy to WordPress.org
 on:
   push:
     tags:
-    - '*'
+      - 'v*'
 jobs:
-  tag:
+  deploy:
     name: New release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 8.0
           extensions: mbstring, intl
           tools: composer
       - name: Install PHP dependencies
@@ -31,13 +33,25 @@ jobs:
           mkdir plugin-build
           composer archive -vvv --format=zip --file="plugin-build/wp-graphql-cloudflare-cache"
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: wp-graphql-cloudflare-cache
           path: plugin-build/wp-graphql-cloudflare-cache.zip
-      - name: Upload release asset
-        uses: softprops/action-gh-release@v1
+      - name: Extract changelog from tag
+        id: changelog
+        run: |
+          # Annotated tags store the message; fall back to empty
+          BODY=$(git tag -l --format='%(contents:body)' "${GITHUB_REF_NAME}" 2>/dev/null || echo "")
+          if [ -z "$BODY" ]; then
+            BODY=$(git tag -l --format='%(contents:subject)' "${GITHUB_REF_NAME}" 2>/dev/null || echo "")
+          fi
+          {
+            echo "body<<CHANGELOG_EOF"
+            echo "$BODY"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
+          body: ${{ steps.changelog.outputs.body }}
           files: plugin-build/wp-graphql-cloudflare-cache.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

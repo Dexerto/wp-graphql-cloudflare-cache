@@ -32,6 +32,9 @@
 		],
 		"phpcbf": [
 			"php ./vendor/bin/phpcbf"
+		],
+		"post-install-cmd": [
+			"git config core.hooksPath .githooks || true"
 		]
     },
     "archive": {

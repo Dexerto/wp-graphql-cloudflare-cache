@@ -1,0 +1,108 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g. 1.1.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    name: Bump version and tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate version format
+        run: |
+          if ! echo "${{ inputs.version }}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Version must be in semver format (e.g. 1.2.3)"
+            exit 1
+          fi
+
+      - name: Check tag does not already exist
+        run: |
+          if git rev-parse "v${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "::error::Tag v${{ inputs.version }} already exists"
+            exit 1
+          fi
+
+      - name: Update version in plugin header
+        run: |
+          sed -i "s/^ \* Version:.*/ * Version:             ${{ inputs.version }}/" wp-graphql-cloudflare-cache.php
+
+      - name: Update stable tag in readme.txt
+        run: |
+          sed -i "s/^Stable tag:.*/Stable tag: ${{ inputs.version }}/" readme.txt
+
+      - name: Verify changes
+        run: |
+          grep "Version:" wp-graphql-cloudflare-cache.php
+          grep "Stable tag:" readme.txt
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Find the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"%s" --no-merges)
+          else
+            COMMITS=$(git log "${PREV_TAG}..HEAD" --pretty=format:"%s" --no-merges)
+          fi
+
+          # Categorize commits
+          FEATURES=""
+          FIXES=""
+          OTHER=""
+
+          while IFS= read -r msg; do
+            [ -z "$msg" ] && continue
+            case "$msg" in
+              feat:*|feat\(*) FEATURES="${FEATURES}\n- ${msg#feat: }" ;;
+              fix:*|fix\(*)   FIXES="${FIXES}\n- ${msg#fix: }" ;;
+              docs:*|chore:*|ci:*|style:*|refactor:*|test:*) ;; # skip noise
+              *)              OTHER="${OTHER}\n- ${msg}" ;;
+            esac
+          done <<< "$COMMITS"
+
+          # Build changelog body
+          BODY=""
+          if [ -n "$FEATURES" ]; then
+            BODY="${BODY}### Features\n${FEATURES}\n\n"
+          fi
+          if [ -n "$FIXES" ]; then
+            BODY="${BODY}### Fixes\n${FIXES}\n\n"
+          fi
+          if [ -n "$OTHER" ]; then
+            BODY="${BODY}### Other\n${OTHER}\n\n"
+          fi
+
+          if [ -z "$BODY" ]; then
+            BODY="Maintenance release."
+          fi
+
+          # Write to file for the deploy workflow to pick up
+          printf "%b" "$BODY" > /tmp/changelog.md
+
+          # Also set as output for this workflow
+          {
+            echo "body<<CHANGELOG_EOF"
+            printf "%b" "$BODY"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Commit and tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add wp-graphql-cloudflare-cache.php readme.txt
+          git commit -m "Release ${{ inputs.version }}"
+          git tag -a "v${{ inputs.version }}" -m "$(cat /tmp/changelog.md)"
+          git push origin main --tags
