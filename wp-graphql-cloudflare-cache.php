@@ -54,14 +54,14 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 					self::$instance->headers();
 					self::$instance->pluginLinks();
 				}
-			}
 
-			/**
-			 * Fire off init action.
-			 *
-			 * @param WpGraphQLCloudflareCache $instance The instance of the WpGraphQLCloudflareCache class
-			 */
-			do_action( 'wp_graphql_cloudflare_cache_init', self::$instance );
+				/**
+				 * Fire off init action.
+				 *
+				 * @param WpGraphQLCloudflareCache $instance The instance of the WpGraphQLCloudflareCache class
+				 */
+				do_action( 'wp_graphql_cloudflare_cache_init', self::$instance );
+			}
 
 			// Return the WpGraphQLCloudflareCache Instance.
 			return self::$instance;
