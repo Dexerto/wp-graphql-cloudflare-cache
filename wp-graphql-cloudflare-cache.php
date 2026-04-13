@@ -113,32 +113,32 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 		private function setup_constants(): void {
 
 			if ( ! function_exists( 'get_plugin_data' ) ) {
-				require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
 			// Plugin version.
-			if ( ! defined( 'wp_graphql_cloudflare_cache_VERSION' ) ) {
-				define( 'wp_graphql_cloudflare_cache_VERSION', get_plugin_data( __FILE__ )['Version'] );
+			if ( ! defined( 'WP_GRAPHQL_CLOUDFLARE_CACHE_VERSION' ) ) {
+				define( 'WP_GRAPHQL_CLOUDFLARE_CACHE_VERSION', get_plugin_data( __FILE__ )['Version'] );
 			}
 
 			// Plugin Folder Path.
-			if ( ! defined( 'wp_graphql_cloudflare_cache_PLUGIN_DIR' ) ) {
-				define( 'wp_graphql_cloudflare_cache_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+			if ( ! defined( 'WP_GRAPHQL_CLOUDFLARE_CACHE_PLUGIN_DIR' ) ) {
+				define( 'WP_GRAPHQL_CLOUDFLARE_CACHE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 			}
 
 			// Plugin Folder URL.
-			if ( ! defined( 'wp_graphql_cloudflare_cache_PLUGIN_URL' ) ) {
-				define( 'wp_graphql_cloudflare_cache_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+			if ( ! defined( 'WP_GRAPHQL_CLOUDFLARE_CACHE_PLUGIN_URL' ) ) {
+				define( 'WP_GRAPHQL_CLOUDFLARE_CACHE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 			}
 
 			// Plugin Root File.
-			if ( ! defined( 'wp_graphql_cloudflare_cache_PLUGIN_FILE' ) ) {
-				define( 'wp_graphql_cloudflare_cache_PLUGIN_FILE', __FILE__ );
+			if ( ! defined( 'WP_GRAPHQL_CLOUDFLARE_CACHE_PLUGIN_FILE' ) ) {
+				define( 'WP_GRAPHQL_CLOUDFLARE_CACHE_PLUGIN_FILE', __FILE__ );
 			}
 
 			// Whether to autoload the files or not.
-			if ( ! defined( 'wp_graphql_cloudflare_cache_AUTOLOAD' ) ) {
-				define( 'wp_graphql_cloudflare_cache_AUTOLOAD', true );
+			if ( ! defined( 'WP_GRAPHQL_CLOUDFLARE_CACHE_AUTOLOAD' ) ) {
+				define( 'WP_GRAPHQL_CLOUDFLARE_CACHE_AUTOLOAD', true );
 			}
 		}
 
@@ -152,9 +152,9 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 		private function includes(): bool {
 
 			// Autoload Required Classes.
-			if ( defined( 'wp_graphql_cloudflare_cache_AUTOLOAD' ) && false !== wp_graphql_cloudflare_cache_AUTOLOAD ) {
-				if ( file_exists( wp_graphql_cloudflare_cache_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
-					require_once wp_graphql_cloudflare_cache_PLUGIN_DIR . 'vendor/autoload.php';
+			if ( defined( 'WP_GRAPHQL_CLOUDFLARE_CACHE_AUTOLOAD' ) && false !== WP_GRAPHQL_CLOUDFLARE_CACHE_AUTOLOAD ) {
+				if ( file_exists( WP_GRAPHQL_CLOUDFLARE_CACHE_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
+					require_once WP_GRAPHQL_CLOUDFLARE_CACHE_PLUGIN_DIR . 'vendor/autoload.php';
 				}
 
 				// Bail if installed incorrectly.
@@ -224,30 +224,32 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 	}
 
 	function check_for_wpgraphql_dependency() {
-		if ( is_admin() && current_user_can( 'activate_plugins' ) && !is_plugin_active( 'wp-graphql/wp-graphql.php' ) ) {
+		if ( is_admin() && current_user_can( 'activate_plugins' ) && ! is_plugin_active( 'wp-graphql/wp-graphql.php' ) ) {
 			add_action( 'admin_notices', 'show_wpgraphql_dependency_notice' );
 	
 			deactivate_plugins( plugin_basename( __FILE__ ) );
-	
+
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard plugin activation cleanup.
 			if ( isset( $_GET['activate'] ) ) {
-				unset( $_GET['activate'] );
+				unset( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			}
 		} else {
 			// Ensure get_plugin_data is available
-			if ( ! function_exists('get_plugin_data') ){
-				require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+			if ( ! function_exists( 'get_plugin_data' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 	
-			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/wp-graphql/wp-graphql.php' );
+			$plugin_data    = get_plugin_data( WP_PLUGIN_DIR . '/wp-graphql/wp-graphql.php' );
 			$plugin_version = $plugin_data['Version'];
 	
 			if ( version_compare( $plugin_version, '1.16.0', '<' ) ) {
 				add_action( 'admin_notices', 'show_wpgraphql_version_notice' );
 				
 				deactivate_plugins( plugin_basename( __FILE__ ) );
-		
+
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- standard plugin activation cleanup.
 				if ( isset( $_GET['activate'] ) ) {
-					unset( $_GET['activate'] );
+					unset( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				}
 			}
 		}

@@ -31,7 +31,7 @@ class Purge {
 		$cloudflare_zone_id   = get_graphql_setting( 'cloudflare_zone_id', '', 'wp_graphql_cloudflare_cache' );
 		$cloudflare_api_token = get_graphql_setting( 'cloudflare_api_token', '', 'wp_graphql_cloudflare_cache' );
 
-		if ( $cloudflare_enabled !== "on" || empty( $cloudflare_zone_id ) || empty( $cloudflare_api_token ) ) {
+		if ( 'on' !== $cloudflare_enabled || empty( $cloudflare_zone_id ) || empty( $cloudflare_api_token ) ) {
 			return;
 		}
 
@@ -50,7 +50,7 @@ class Purge {
 				'Content-Type'  => 'application/json',
 				'Authorization' => 'Bearer ' . $auth_key,
 			],
-			'body' => wp_json_encode([
+			'body'    => wp_json_encode([
 				'tags' => array_values( $purge_keys ),
 			]),
 		]);
@@ -73,6 +73,7 @@ class Purge {
 	}
 
 	private static function set_error( $message ) {
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- intentional logging for failed purge requests.
 		error_log( 'Cloudflare Cache Purge Error: ' . $message );
 		set_transient( self::ERROR_TRANSIENT, $message, HOUR_IN_SECONDS );
 	}
