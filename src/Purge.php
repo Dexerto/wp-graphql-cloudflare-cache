@@ -40,11 +40,19 @@ class Purge {
 		]);
 
         if ( is_wp_error( $response ) ) {
-            $error_message = $response->get_error_message();
-			error_log( 'Cloudflare Cache Purge Error: ' . $error_message );
-			return $error_message;
+			error_log( 'Cloudflare Cache Purge Error: ' . $response->get_error_message() );
+			return false;
         }
 
-        return json_decode( wp_remote_retrieve_body( $response ), true );
+        $status_code = wp_remote_retrieve_response_code( $response );
+        $body        = json_decode( wp_remote_retrieve_body( $response ), true );
+
+        if ( $status_code < 200 || $status_code >= 300 || empty( $body['success'] ) ) {
+			$errors = isset( $body['errors'] ) ? wp_json_encode( $body['errors'] ) : "HTTP $status_code";
+			error_log( 'Cloudflare Cache Purge Failed: ' . $errors );
+			return false;
+        }
+
+        return $body;
 	}
 }
