@@ -6,7 +6,7 @@
  * Plugin URI:          https://wordpress.org/plugins/wp-graphql-cloudflare-cache
  * GitHub Plugin URI:   https://github.com/gdidentity/wp-graphql-cloudflare-cache
  * Description:         Extends WPGraphQL to add Cloudflare Tags to GraphQL responses and purge them when content is updated.
- * Version:             1.0.0
+ * Version:             1.1.0
  * Author:              humet
  * Author URI:          https://www.github.com/humet
  * Text Domain:         wp-graphql-cloudflare-cache
