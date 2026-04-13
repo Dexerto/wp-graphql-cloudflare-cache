@@ -6,39 +6,53 @@ class Purge {
     const CLOUDFLARE_API_URL = 'https://api.cloudflare.com/client/v4/zones/';
     const ERROR_TRANSIENT    = 'wpgraphql_cf_purge_error';
 
+	private static $pending_keys = [];
+
 	public static function init() {
-		add_action( 'graphql_purge', [ self::class, 'purge_tags' ], 10, 1 );
+		add_action( 'graphql_purge', [ self::class, 'queue_purge' ], 10, 1 );
+		add_action( 'shutdown', [ self::class, 'flush_purge_queue' ] );
 		add_action( 'admin_notices', [ self::class, 'show_purge_error_notice' ] );
 	}
 
-	public static function purge_tags( $purge_keys, $event = '', $hostname = '' ) {
-        $cloudflare_enabled = get_graphql_setting( 'cloudflare_enabled', false, 'wp_graphql_cloudflare_cache' );
-        $cloudflare_zone_id = get_graphql_setting( 'cloudflare_zone_id', '', 'wp_graphql_cloudflare_cache' );
-        $cloudflare_api_token = get_graphql_setting( 'cloudflare_api_token', '', 'wp_graphql_cloudflare_cache' );
+	public static function queue_purge( $purge_keys ) {
+		if ( ! is_array( $purge_keys ) ) {
+			$purge_keys = [ $purge_keys ];
+		}
 
-        if ( $cloudflare_enabled !== "on" || empty($cloudflare_zone_id) || empty($cloudflare_api_token) ) {
+		self::$pending_keys = array_merge( self::$pending_keys, $purge_keys );
+	}
+
+	public static function flush_purge_queue() {
+		if ( empty( self::$pending_keys ) ) {
 			return;
 		}
 
-		self::cloudflare_cache_purge( $purge_keys, $cloudflare_zone_id, $cloudflare_api_token );
+        $cloudflare_enabled   = get_graphql_setting( 'cloudflare_enabled', false, 'wp_graphql_cloudflare_cache' );
+        $cloudflare_zone_id   = get_graphql_setting( 'cloudflare_zone_id', '', 'wp_graphql_cloudflare_cache' );
+        $cloudflare_api_token = get_graphql_setting( 'cloudflare_api_token', '', 'wp_graphql_cloudflare_cache' );
+
+        if ( $cloudflare_enabled !== "on" || empty( $cloudflare_zone_id ) || empty( $cloudflare_api_token ) ) {
+			return;
+		}
+
+		$keys              = array_unique( self::$pending_keys );
+		self::$pending_keys = [];
+
+		self::cloudflare_cache_purge( $keys, $cloudflare_zone_id, $cloudflare_api_token );
 	}
 
     public static function cloudflare_cache_purge( $purge_keys, $zone_id, $auth_key ) {
-        if ( ! is_array( $purge_keys ) ) {
-            $purge_keys = [ $purge_keys ];
-        }
-        
 		$api_url = self::CLOUDFLARE_API_URL . $zone_id . '/purge_cache';
-        
+
         $response = wp_remote_post( $api_url, [
-			'method' => 'POST',
+			'method'  => 'POST',
 			'headers' => [
-				'Content-Type' => 'application/json',
+				'Content-Type'  => 'application/json',
 				'Authorization' => 'Bearer ' . $auth_key,
 			],
 			'body' => wp_json_encode([
-				'tags' => $purge_keys
-			])
+				'tags' => array_values( $purge_keys ),
+			]),
 		]);
 
         if ( is_wp_error( $response ) ) {
