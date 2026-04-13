@@ -1,0 +1,14 @@
+{
+	"name": "wp-graphql-cloudflare-cache",
+	"private": true,
+	"scripts": {
+		"wp-env": "wp-env",
+		"start": "wp-env start && node bin/post-start.mjs",
+		"stop": "wp-env stop",
+		"destroy": "wp-env destroy",
+		"seed": "wp-env run cli wp eval-file wp-content/plugins/wp-graphql-cloudflare-cache/bin/seed.php"
+	},
+	"devDependencies": {
+		"@wordpress/env": "^10.0.0"
+	}
+}
