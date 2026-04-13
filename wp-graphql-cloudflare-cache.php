@@ -46,7 +46,7 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 		 * @return WpGraphQLCloudflareCache The one true WpGraphQLCloudflareCache
 		 */
 		public static function instance(): self {
-			if ( ! isset( self::$instance ) && ! ( is_a( self::$instance, __CLASS__ ) ) ) {
+			if ( ! isset( self::$instance ) || ! ( is_a( self::$instance, __CLASS__ ) ) ) {
 				self::$instance = new self();
 				self::$instance->setup_constants();
 				if ( self::$instance->includes() ) {
