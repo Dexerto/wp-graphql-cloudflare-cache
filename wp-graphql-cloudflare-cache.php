@@ -178,7 +178,7 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 			} ?>
 			<div class="notice notice-error">
 				<p>
-					<?php esc_html_e( 'WPGraphQL Cloudflare Cache appears to have been installed without its dependencies. It will not work properly until dependencies are installed. This likely means you have cloned Next.js On-Demand Revalidation from Github and need to run the command `composer install`.', 'wp-graphql-cloudflare-cache' ); ?>
+					<?php esc_html_e( 'WPGraphQL Cloudflare Cache appears to have been installed without its dependencies. It will not work properly until dependencies are installed. This likely means you have cloned the repository from GitHub and need to run the command `composer install`.', 'wp-graphql-cloudflare-cache' ); ?>
 				</p>
 			</div>
 			<?php
