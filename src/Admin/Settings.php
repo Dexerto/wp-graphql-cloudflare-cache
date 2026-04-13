@@ -34,7 +34,7 @@ class Settings {
 				'name'              => 'cloudflare_api_token',
 				'label'             => __( 'API Token', 'wp-graphql-cloudflare-cache' ),
 				'desc'              => __( 'Create an API Token at https://dash.cloudflare.com/profile/api-tokens', 'wp-graphql-cloudflare-cache' ),
-				'type'              => 'text',
+				'type'              => 'password',
 			],
 		]);
 	}
