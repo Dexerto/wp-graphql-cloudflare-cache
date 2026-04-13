@@ -2,6 +2,12 @@ name: Deploy to WordPress.org
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to deploy (e.g. v1.1.0)'
+        required: true
+        type: string
 jobs:
   deploy:
     name: New release
@@ -12,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
