@@ -3,8 +3,8 @@
 namespace WpGraphQLCloudflareCache;
 
 class Purge {
-    const CLOUDFLARE_API_URL = 'https://api.cloudflare.com/client/v4/zones/';
-    const ERROR_TRANSIENT    = 'wpgraphql_cf_purge_error';
+	const CLOUDFLARE_API_URL = 'https://api.cloudflare.com/client/v4/zones/';
+	const ERROR_TRANSIENT    = 'wpgraphql_cf_purge_error';
 
 	private static $pending_keys = [];
 
@@ -27,24 +27,24 @@ class Purge {
 			return;
 		}
 
-        $cloudflare_enabled   = get_graphql_setting( 'cloudflare_enabled', false, 'wp_graphql_cloudflare_cache' );
-        $cloudflare_zone_id   = get_graphql_setting( 'cloudflare_zone_id', '', 'wp_graphql_cloudflare_cache' );
-        $cloudflare_api_token = get_graphql_setting( 'cloudflare_api_token', '', 'wp_graphql_cloudflare_cache' );
+		$cloudflare_enabled   = get_graphql_setting( 'cloudflare_enabled', false, 'wp_graphql_cloudflare_cache' );
+		$cloudflare_zone_id   = get_graphql_setting( 'cloudflare_zone_id', '', 'wp_graphql_cloudflare_cache' );
+		$cloudflare_api_token = get_graphql_setting( 'cloudflare_api_token', '', 'wp_graphql_cloudflare_cache' );
 
-        if ( $cloudflare_enabled !== "on" || empty( $cloudflare_zone_id ) || empty( $cloudflare_api_token ) ) {
+		if ( $cloudflare_enabled !== "on" || empty( $cloudflare_zone_id ) || empty( $cloudflare_api_token ) ) {
 			return;
 		}
 
-		$keys              = array_unique( self::$pending_keys );
+		$keys               = array_unique( self::$pending_keys );
 		self::$pending_keys = [];
 
 		self::cloudflare_cache_purge( $keys, $cloudflare_zone_id, $cloudflare_api_token );
 	}
 
-    public static function cloudflare_cache_purge( $purge_keys, $zone_id, $auth_key ) {
+	public static function cloudflare_cache_purge( $purge_keys, $zone_id, $auth_key ) {
 		$api_url = self::CLOUDFLARE_API_URL . $zone_id . '/purge_cache';
 
-        $response = wp_remote_post( $api_url, [
+		$response = wp_remote_post( $api_url, [
 			'method'  => 'POST',
 			'headers' => [
 				'Content-Type'  => 'application/json',
@@ -55,21 +55,21 @@ class Purge {
 			]),
 		]);
 
-        if ( is_wp_error( $response ) ) {
+		if ( is_wp_error( $response ) ) {
 			self::set_error( $response->get_error_message() );
 			return false;
-        }
+		}
 
-        $status_code = wp_remote_retrieve_response_code( $response );
-        $body        = json_decode( wp_remote_retrieve_body( $response ), true );
+		$status_code = wp_remote_retrieve_response_code( $response );
+		$body        = json_decode( wp_remote_retrieve_body( $response ), true );
 
-        if ( $status_code < 200 || $status_code >= 300 || empty( $body['success'] ) ) {
+		if ( $status_code < 200 || $status_code >= 300 || empty( $body['success'] ) ) {
 			$errors = isset( $body['errors'] ) ? wp_json_encode( $body['errors'] ) : "HTTP $status_code";
 			self::set_error( $errors );
 			return false;
-        }
+		}
 
-        return $body;
+		return $body;
 	}
 
 	private static function set_error( $message ) {
