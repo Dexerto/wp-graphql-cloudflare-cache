@@ -118,7 +118,7 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 
 			// Plugin version.
 			if ( ! defined( 'WP_GRAPHQL_CLOUDFLARE_CACHE_VERSION' ) ) {
-				define( 'WP_GRAPHQL_CLOUDFLARE_CACHE_VERSION', get_plugin_data( __FILE__ )['Version'] );
+				define( 'WP_GRAPHQL_CLOUDFLARE_CACHE_VERSION', get_plugin_data( __FILE__, false, false )['Version'] );
 			}
 
 			// Plugin Folder Path.
@@ -239,7 +239,7 @@ if ( ! class_exists( 'WpGraphQLCloudflareCache' ) ) :
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 	
-			$plugin_data    = get_plugin_data( WP_PLUGIN_DIR . '/wp-graphql/wp-graphql.php' );
+			$plugin_data    = get_plugin_data( WP_PLUGIN_DIR . '/wp-graphql/wp-graphql.php', false, false );
 			$plugin_version = $plugin_data['Version'];
 	
 			if ( version_compare( $plugin_version, '1.16.0', '<' ) ) {
